@@ -18,10 +18,10 @@ const Contact: React.FC = () => {
         // Template ID: template_id
         // Public Key: public_key
         emailjs.sendForm(
-            'YOUR_SERVICE_ID',
-            'YOUR_TEMPLATE_ID',
+            'service_832bybl',
+            'template_td6rjm8',
             formRef.current,
-            'YOUR_PUBLIC_KEY'
+            'Z51grPjFr4PnyQSp8'
         )
             .then((result) => {
                 console.log(result.text);
