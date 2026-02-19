@@ -6,11 +6,12 @@ interface LayoutProps {
     children: React.ReactNode;
     onOpenBooking: () => void;
     onOpenMyAppointments: () => void;
+    onGoHome: () => void;
     currentView: 'home' | 'my-appointments';
     isLoggedIn: boolean;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, onOpenBooking, onOpenMyAppointments, currentView, isLoggedIn }) => {
+const Layout: React.FC<LayoutProps> = ({ children, onOpenBooking, onOpenMyAppointments, onGoHome, currentView, isLoggedIn }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -27,7 +28,10 @@ const Layout: React.FC<LayoutProps> = ({ children, onOpenBooking, onOpenMyAppoin
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-20">
                         {/* Logo */}
-                        <div className="flex-shrink-0 flex items-center">
+                        <div
+                            className="flex-shrink-0 flex items-center cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={onGoHome}
+                        >
                             <span className="font-serif text-2xl font-bold tracking-tight">
                                 Nuria Olias<span className="text-brand-gold">.</span>
                             </span>
