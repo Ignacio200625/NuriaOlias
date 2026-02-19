@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar as CalendarIcon, Clock, Check, ChevronLeft, ChevronRight, User, Scissors } from 'lucide-react';
+import { X, Calendar as CalendarIcon, Clock, Check, ChevronLeft, ChevronRight, User, Scissors, Mail } from 'lucide-react';
 import type { Service, TimeSlot } from '../types';
 import { services } from '../data/mockData';
 import { useAppointments } from '../context/AppointmentContext';
+import { sendConfirmationEmail } from '../lib/emailService';
+import { auth } from '../lib/auth';
 
 interface BookingModalProps {
     isOpen: boolean;
@@ -17,6 +19,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     const [customerName, setCustomerName] = useState('');
     const [customerPhone, setCustomerPhone] = useState('');
     const [customerMessage, setCustomerMessage] = useState('');
+    const [emailSent, setEmailSent] = useState(false);
     const [currentMonth, setCurrentMonth] = useState(new Date());
 
     const { addAppointment, isSlotAvailable, loading, error } = useAppointments();
@@ -30,6 +33,8 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
             setSelectedTime(null);
             setCustomerName('');
             setCustomerPhone('');
+            setCustomerMessage('');
+            setEmailSent(false);
             setCurrentMonth(new Date());
         }
     }, [isOpen]);
@@ -121,7 +126,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         return slots;
     };
 
-    const handleBooking = (e: React.FormEvent) => {
+    const handleBooking = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!selectedService || !selectedDate || !selectedTime) return;
@@ -137,12 +142,32 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
             serviceId: selectedService.id,
             customerName,
             customerPhone,
-            // message field added to type
             message: customerMessage
         };
 
-        addAppointment(newAppointment);
-        nextStep(); // Goal: Success screen
+        await addAppointment(newAppointment);
+
+        // Send confirmation email using the logged-in user's email from Firebase Auth
+        const userEmail = auth.currentUser?.email;
+        if (userEmail) {
+            try {
+                await sendConfirmationEmail({
+                    customerName,
+                    customerEmail: userEmail,
+                    serviceName: selectedService.name,
+                    appointmentDate: bookingDate.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+                    appointmentTime: selectedTime,
+                    servicePrice: selectedService.price,
+                    serviceDuration: selectedService.duration,
+                });
+                setEmailSent(true);
+            } catch (err) {
+                console.error('Error enviando correo de confirmación:', err);
+                setEmailSent(false);
+            }
+        }
+
+        nextStep(); // Go to success screen
     };
 
     return (
@@ -280,6 +305,12 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                                                 onChange={e => setCustomerPhone(e.target.value)}
                                             />
                                         </div>
+                                        {auth.currentUser?.email && (
+                                            <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+                                                <Mail size={15} className="text-amber-500 shrink-0" />
+                                                La confirmación se enviará a <strong className="text-gray-700">{auth.currentUser.email}</strong>
+                                            </div>
+                                        )}
 
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Nota (Opcional)</label>
@@ -304,10 +335,18 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                                         <Check size={40} />
                                     </div>
                                     <h3 className="text-2xl font-serif text-gray-900 mb-2">¡Reserva Confirmada!</h3>
-                                    <p className="text-gray-600 mb-8">
-                                        Te hemos reservado tu cita para {selectedService?.name}.<br />
-                                        Nos vemos el {selectedDate?.toLocaleDateString()} a las {selectedTime}.
+                                    <p className="text-gray-600 mb-2">
+                                        Tu cita para <strong>{selectedService?.name}</strong> está reservada.<br />
+                                        Nos vemos el {selectedDate?.toLocaleDateString('es-ES')} a las {selectedTime}.
                                     </p>
+                                    {emailSent && (
+                                        <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-2 inline-flex items-center gap-2 mb-6">
+                                            <Mail size={15} /> Correo de confirmación enviado a <strong>{auth.currentUser?.email}</strong>
+                                        </p>
+                                    )}
+                                    {!emailSent && (
+                                        <p className="text-sm text-gray-400 mb-6">Recuerda anotar tu cita en el calendario.</p>
+                                    )}
                                     <button onClick={onClose} className="bg-gray-900 text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition">
                                         Entendido
                                     </button>

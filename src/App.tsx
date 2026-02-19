@@ -1,36 +1,46 @@
-import { useState, useEffect } from 'react';
-import Layout from './components/Layout';
-import Hero from './components/Hero';
-import Services from './components/Services';
-import Gallery from './components/Gallery';
-import Contact from './components/Contact';
-import BookingModal from './components/BookingModal';
-import AdminDashboard from './components/AdminDashboard';
-import { AppointmentProvider } from './context/AppointmentContext';
+import { useState, useEffect } from "react";
+import Layout from "./components/Layout";
+import Hero from "./components/Hero";
+import Services from "./components/Services";
+import Gallery from "./components/Gallery";
+import Contact from "./components/Contact";
+import BookingModal from "./components/BookingModal";
+import AdminDashboard from "./components/AdminDashboard";
+import AuthForm from "./components/AuthForm";
+import { AppointmentProvider } from "./context/AppointmentContext";
+import { observeAuth } from "./lib/auth";
+import type { User } from "firebase/auth";
 
 function App() {
-  const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(window.location.hash === '#admin');
+  const [user, setUser] = useState<User | null>(null);
+  const [isBookingOpen, setIsBookingOpen] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(window.location.hash === "#admin");
 
+  // Observa la autenticación
+  useEffect(() => {
+    const unsubscribe = observeAuth((currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Manejo de hash para admin
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
 
-      // Secret setup route
-      if (hash === '#setup-admin-device') {
-        localStorage.setItem('adminDeviceAllowed', 'true');
-        window.location.hash = '#admin';
+      if (hash === "#setup-admin-device") {
+        localStorage.setItem("adminDeviceAllowed", "true");
+        window.location.hash = "#admin";
         return;
       }
 
-      // Admin check
-      if (hash === '#admin') {
-        const isAllowed = localStorage.getItem('adminDeviceAllowed') === 'true';
-        if (isAllowed) {
+      if (hash === "#admin") {
+        const isAllowed = localStorage.getItem("adminDeviceAllowed") === "true";
+        if (isAllowed && user) {
           setIsAdmin(true);
         } else {
-          // Not allowed, redirect to home
-          window.location.hash = '';
+          window.location.hash = "";
           setIsAdmin(false);
         }
       } else {
@@ -38,13 +48,17 @@ function App() {
       }
     };
 
-    // Initial check
     handleHashChange();
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, [user]);
 
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  // Mostrar AuthForm si no hay usuario
+  if (!user) {
+    return <AuthForm onSuccess={() => {}} />; // onSuccess actualiza el observer automáticamente
+  }
 
+  // Mostrar admin
   if (isAdmin) {
     return (
       <AppointmentProvider>
@@ -53,6 +67,7 @@ function App() {
     );
   }
 
+  // Mostrar app normal
   return (
     <AppointmentProvider>
       <Layout onOpenBooking={() => setIsBookingOpen(true)}>
@@ -60,7 +75,10 @@ function App() {
         <Services />
         <Gallery />
         <Contact />
-        <BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} />
+        <BookingModal
+          isOpen={isBookingOpen}
+          onClose={() => setIsBookingOpen(false)}
+        />
       </Layout>
     </AppointmentProvider>
   );

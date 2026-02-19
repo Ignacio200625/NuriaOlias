@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Menu, X, Instagram, Phone, MapPin } from 'lucide-react';
+import { logoutUser } from '../lib/auth';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -10,6 +11,11 @@ const Layout: React.FC<LayoutProps> = ({ children, onOpenBooking }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+    const handleLogout = async () => {
+        await logoutUser();
+        window.location.reload(); // recarga para mostrar AuthForm
+    };
 
     return (
         <div className="min-h-screen flex flex-col font-sans text-brand-black bg-brand-cream">
@@ -25,16 +31,24 @@ const Layout: React.FC<LayoutProps> = ({ children, onOpenBooking }) => {
                         </div>
 
                         {/* Desktop Menu */}
-                        <div className="hidden md:flex items-center space-x-8">
+                        <div className="hidden md:flex items-center space-x-6">
                             <a href="#home" className="text-sm font-medium hover:text-brand-gold transition-colors">INICIO</a>
                             <a href="#services" className="text-sm font-medium hover:text-brand-gold transition-colors">SERVICIOS</a>
                             <a href="#gallery" className="text-sm font-medium hover:text-brand-gold transition-colors">GALERÍA</a>
                             <a href="#contact" className="text-sm font-medium hover:text-brand-gold transition-colors">CONTACTO</a>
+
                             <button
                                 onClick={onOpenBooking}
-                                className="px-8 py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-full font-medium hover:shadow-lg hover:shadow-amber-400/50 hover:scale-105 transition-all duration-300"
+                                className="px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-full font-medium hover:shadow-lg hover:shadow-amber-400/50 hover:scale-105 transition-all duration-300"
                             >
                                 Pedir Cita
+                            </button>
+
+                            <button
+                                onClick={handleLogout}
+                                className="px-4 py-2 bg-red-500 text-white rounded-full font-medium hover:bg-red-600 transition-colors"
+                            >
+                                Cerrar Sesión
                             </button>
                         </div>
 
@@ -82,14 +96,25 @@ const Layout: React.FC<LayoutProps> = ({ children, onOpenBooking }) => {
                             >
                                 CONTACTO
                             </a>
+
                             <button
-                                className="px-8 py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-full font-medium hover:shadow-lg hover:shadow-amber-400/50 hover:scale-105 transition-all duration-300 mt-4 block w-full text-center bg-brand-black text-white px-6 py-3 rounded-full font-medium hover:bg-brand-gold transition-colors"
                                 onClick={() => {
                                     onOpenBooking();
                                     setIsMenuOpen(false);
                                 }}
+                                className="w-full py-2 mt-4 bg-gradient-to-r from-amber-400 to-amber-500 text-white font-semibold rounded-full hover:shadow-lg hover:shadow-amber-400/50 transition-all"
                             >
-                                RESERVAR CITA
+                                Pedir Cita
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    handleLogout();
+                                    setIsMenuOpen(false);
+                                }}
+                                className="w-full py-2 mt-2 bg-red-500 text-white font-semibold rounded-full hover:bg-red-600 transition-all"
+                            >
+                                Cerrar Sesión
                             </button>
                         </div>
                     </div>
@@ -107,7 +132,9 @@ const Layout: React.FC<LayoutProps> = ({ children, onOpenBooking }) => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                         {/* Brand */}
                         <div>
-                            <h3 className="font-serif text-3xl font-bold mb-6 bg-gradient-to-r from-white via-amber-100 to-white bg-clip-text text-transparent drop-shadow-lg">Nuria Olias<span className="text-transparent bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text">.</span></h3>
+                            <h3 className="font-serif text-3xl font-bold mb-6 bg-gradient-to-r from-white via-amber-100 to-white bg-clip-text text-transparent drop-shadow-lg">
+                                Nuria Olias<span className="text-transparent bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text">.</span>
+                            </h3>
                             <p className="text-gray-300 mb-6 max-w-sm leading-relaxed">
                                 Tu destino para el <span className="text-transparent bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text font-medium">cuidado capilar de lujo</span>. Especialistas en coloración, tratamientos y estilismo personalizado.
                             </p>
