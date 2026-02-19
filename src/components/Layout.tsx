@@ -5,9 +5,12 @@ import { logoutUser } from '../lib/auth';
 interface LayoutProps {
     children: React.ReactNode;
     onOpenBooking: () => void;
+    onOpenMyAppointments: () => void;
+    currentView: 'home' | 'my-appointments';
+    isLoggedIn: boolean;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, onOpenBooking }) => {
+const Layout: React.FC<LayoutProps> = ({ children, onOpenBooking, onOpenMyAppointments, currentView, isLoggedIn }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -32,10 +35,14 @@ const Layout: React.FC<LayoutProps> = ({ children, onOpenBooking }) => {
 
                         {/* Desktop Menu */}
                         <div className="hidden md:flex items-center space-x-6">
-                            <a href="#home" className="text-sm font-medium hover:text-brand-gold transition-colors">INICIO</a>
-                            <a href="#services" className="text-sm font-medium hover:text-brand-gold transition-colors">SERVICIOS</a>
-                            <a href="#gallery" className="text-sm font-medium hover:text-brand-gold transition-colors">GALERÍA</a>
-                            <a href="#contact" className="text-sm font-medium hover:text-brand-gold transition-colors">CONTACTO</a>
+                            {isLoggedIn && (
+                                <button
+                                    onClick={onOpenMyAppointments}
+                                    className={`text-sm font-medium transition-colors ${currentView === 'my-appointments' ? 'text-brand-gold' : 'hover:text-brand-gold'}`}
+                                >
+                                    MIS CITAS
+                                </button>
+                            )}
 
                             <button
                                 onClick={onOpenBooking}
@@ -97,6 +104,18 @@ const Layout: React.FC<LayoutProps> = ({ children, onOpenBooking }) => {
                             >
                                 CONTACTO
                             </a>
+
+                            {isLoggedIn && (
+                                <button
+                                    onClick={() => {
+                                        onOpenMyAppointments();
+                                        setIsMenuOpen(false);
+                                    }}
+                                    className="w-full py-2 text-base font-medium hover:text-brand-gold border-b border-gray-50 mb-2"
+                                >
+                                    MIS CITAS
+                                </button>
+                            )}
 
                             <button
                                 onClick={() => {

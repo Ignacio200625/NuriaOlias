@@ -7,6 +7,7 @@ import Contact from "./components/Contact";
 import BookingModal from "./components/BookingModal";
 import AdminDashboard from "./components/AdminDashboard";
 import AuthForm from "./components/AuthForm";
+import UserDashboard from "./components/UserDashboard";
 import { AppointmentProvider } from "./context/AppointmentContext";
 import { observeAuth } from "./lib/auth";
 import type { User } from "firebase/auth";
@@ -15,6 +16,7 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [isBookingOpen, setIsBookingOpen] = useState<boolean>(false);
+  const [currentView, setCurrentView] = useState<'home' | 'my-appointments'>('home');
   const [isAdmin, setIsAdmin] = useState<boolean>(window.location.hash === "#admin");
 
   // Observa la autenticación
@@ -76,15 +78,30 @@ function App() {
   // Mostrar app normal
   return (
     <AppointmentProvider>
-      <Layout onOpenBooking={() => setIsBookingOpen(true)}>
-        <Hero onOpenBooking={() => setIsBookingOpen(true)} />
-        <Services />
-        <Gallery />
-        <Contact />
+      <Layout
+        onOpenBooking={() => setIsBookingOpen(true)}
+        onOpenMyAppointments={() => setCurrentView('my-appointments')}
+        currentView={currentView}
+        isLoggedIn={!!user}
+      >
+        {currentView === 'home' ? (
+          <>
+            <Hero onOpenBooking={() => setIsBookingOpen(true)} />
+            <Services />
+            <Gallery />
+            <Contact />
+          </>
+        ) : (
+          <UserDashboard
+            userEmail={user.email || ""}
+            onBack={() => setCurrentView('home')}
+          />
+        )}
         <BookingModal
           isOpen={isBookingOpen}
           onClose={() => setIsBookingOpen(false)}
           userEmail={user?.email}
+          userName={user?.displayName}
         />
       </Layout>
     </AppointmentProvider>

@@ -9,9 +9,10 @@ interface BookingModalProps {
     isOpen: boolean;
     onClose: () => void;
     userEmail?: string | null;
+    userName?: string | null;
 }
 
-export default function BookingModal({ isOpen, onClose, userEmail }: BookingModalProps) {
+export default function BookingModal({ isOpen, onClose, userEmail, userName }: BookingModalProps) {
     const [step, setStep] = useState(1);
     const [selectedService, setSelectedService] = useState<Service | null>(null);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -31,13 +32,13 @@ export default function BookingModal({ isOpen, onClose, userEmail }: BookingModa
             setSelectedService(null);
             setSelectedDate(null);
             setSelectedTime(null);
-            setCustomerName('');
+            setCustomerName(userName || '');
             setCustomerPhone('');
             setCustomerMessage('');
             setEmailSent(false);
             setCurrentMonth(new Date());
         }
-    }, [isOpen]);
+    }, [isOpen, userName]);
 
     if (!isOpen) return null;
 
@@ -142,10 +143,16 @@ export default function BookingModal({ isOpen, onClose, userEmail }: BookingModa
             serviceId: selectedService.id,
             customerName,
             customerPhone,
+            customerEmail: userEmail || "",
             message: customerMessage
         };
 
-        await addAppointment(newAppointment);
+        try {
+            await addAppointment(newAppointment);
+        } catch (err) {
+            console.error("Error al guardar la cita en Firebase:", err);
+            // Podríamos mostrar un error aquí si quisiéramos ser más estrictos
+        }
 
         // Send confirmation email using the logged-in user's email from Firebase Auth
         if (userEmail) {
