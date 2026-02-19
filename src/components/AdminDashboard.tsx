@@ -4,6 +4,8 @@ import { Clock, User, Phone, MessageSquare, ArrowLeft, Trash2, AlertTriangle, X,
 import { services } from '../data/mockData';
 import type { Appointment } from '../types';
 
+//setup-admin-device
+
 export default function AdminDashboard() {
     const { appointments, removeAppointment, loading } = useAppointments();
     const [password, setPassword] = useState('');
@@ -17,7 +19,8 @@ export default function AdminDashboard() {
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
-        if (password === 'admin123') { // Simple hardcoded password for MVP
+        const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
+        if (password === adminPassword) {
             setIsAuthenticated(true);
             localStorage.setItem('adminAuth', 'true');
         } else {

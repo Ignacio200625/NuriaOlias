@@ -1,7 +1,7 @@
 import emailjs from '@emailjs/browser';
 
 const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID as string;
-const APPOINTMENT_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID as string;
+const APPOINTMENT_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_APPOINTMENT_TEMPLATE_ID as string;
 const VERIFICATION_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_VERIFICATION_TEMPLATE_ID as string;
 const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY as string;
 
