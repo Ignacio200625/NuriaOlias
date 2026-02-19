@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, Instagram, Phone, MapPin } from 'lucide-react';
+import { Menu, X, Instagram, Phone, MapPin, LogOut } from 'lucide-react';
 import { logoutUser } from '../lib/auth';
 
 interface LayoutProps {
@@ -46,9 +46,10 @@ const Layout: React.FC<LayoutProps> = ({ children, onOpenBooking }) => {
 
                             <button
                                 onClick={handleLogout}
-                                className="px-4 py-2 bg-red-500 text-white rounded-full font-medium hover:bg-red-600 transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-500 border border-red-200 rounded-full hover:bg-red-50 hover:border-red-300 transition-all duration-300"
                             >
-                                Cerrar Sesión
+                                <LogOut size={16} />
+                                <span>Cerrar Sesión</span>
                             </button>
                         </div>
 
@@ -112,9 +113,10 @@ const Layout: React.FC<LayoutProps> = ({ children, onOpenBooking }) => {
                                     handleLogout();
                                     setIsMenuOpen(false);
                                 }}
-                                className="w-full py-2 mt-2 bg-red-500 text-white font-semibold rounded-full hover:bg-red-600 transition-all"
+                                className="w-full flex items-center justify-center gap-2 py-3 mt-2 text-red-500 font-bold bg-red-50 border border-red-100 rounded-full hover:bg-red-100 transition-all"
                             >
-                                Cerrar Sesión
+                                <LogOut size={18} />
+                                <span>Cerrar Sesión</span>
                             </button>
                         </div>
                     </div>

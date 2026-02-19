@@ -1,5 +1,4 @@
-// src/firebase/auth.ts
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, sendEmailVerification } from "firebase/auth";
 import type { User } from "firebase/auth"; // Tipo de usuario de Firebase
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { app } from "./firebase";
@@ -69,4 +68,12 @@ export const observeAuth = (callback: (user: User | null) => void) => {
 export const resetPassword = (email: string) => {
   return sendPasswordResetEmail(auth, email);
 };
+
+/**
+ * Enviar email de verificación al usuario actual
+ */
+export const verifyEmail = (user: User) => {
+  return sendEmailVerification(user);
+};
+
 

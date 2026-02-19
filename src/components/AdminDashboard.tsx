@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAppointments } from '../context/AppointmentContext';
-import { Clock, User, Phone, MessageSquare, ArrowLeft, Trash2, AlertTriangle, X } from 'lucide-react';
+import { Clock, User, Phone, MessageSquare, ArrowLeft, Trash2, AlertTriangle, X, LogOut } from 'lucide-react';
 import { services } from '../data/mockData';
 import type { Appointment } from '../types';
 
@@ -101,7 +101,13 @@ export default function AdminDashboard() {
                         <button onClick={() => window.location.hash = ''} className="p-2 hover:bg-gray-200 rounded-full transition"><ArrowLeft /></button>
                         <h1 className="text-3xl font-serif font-bold text-gray-900">Citas Programadas</h1>
                     </div>
-                    <button onClick={handleLogout} className="text-red-600 font-medium hover:text-red-700">Cerrar Sesión</button>
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition-all shadow-sm"
+                    >
+                        <LogOut size={16} />
+                        Cerrar Sesión
+                    </button>
                 </div>
 
                 {Object.keys(groupedAppointments).length === 0 ? (

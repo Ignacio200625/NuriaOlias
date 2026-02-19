@@ -4,14 +4,14 @@ import type { Service, TimeSlot } from '../types';
 import { services } from '../data/mockData';
 import { useAppointments } from '../context/AppointmentContext';
 import { sendConfirmationEmail } from '../lib/emailService';
-import { auth } from '../lib/auth';
 
 interface BookingModalProps {
     isOpen: boolean;
     onClose: () => void;
+    userEmail?: string | null;
 }
 
-export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
+export default function BookingModal({ isOpen, onClose, userEmail }: BookingModalProps) {
     const [step, setStep] = useState(1);
     const [selectedService, setSelectedService] = useState<Service | null>(null);
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -148,12 +148,12 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         await addAppointment(newAppointment);
 
         // Send confirmation email using the logged-in user's email from Firebase Auth
-        const userEmail = auth.currentUser?.email;
         if (userEmail) {
             try {
                 await sendConfirmationEmail({
                     customerName,
                     customerEmail: userEmail,
+                    customerPhone,
                     serviceName: selectedService.name,
                     appointmentDate: bookingDate.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
                     appointmentTime: selectedTime,
@@ -305,10 +305,10 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                                                 onChange={e => setCustomerPhone(e.target.value)}
                                             />
                                         </div>
-                                        {auth.currentUser?.email && (
+                                        {userEmail && (
                                             <div className="flex items-center gap-2 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
                                                 <Mail size={15} className="text-amber-500 shrink-0" />
-                                                La confirmación se enviará a <strong className="text-gray-700">{auth.currentUser.email}</strong>
+                                                La confirmación se enviará a <strong className="text-gray-700">{userEmail}</strong>
                                             </div>
                                         )}
 
@@ -341,7 +341,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
                                     </p>
                                     {emailSent && (
                                         <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-2 inline-flex items-center gap-2 mb-6">
-                                            <Mail size={15} /> Correo de confirmación enviado a <strong>{auth.currentUser?.email}</strong>
+                                            <Mail size={15} /> Correo de confirmación enviado a <strong>{userEmail}</strong>
                                         </p>
                                     )}
                                     {!emailSent && (

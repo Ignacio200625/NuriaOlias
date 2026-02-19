@@ -13,6 +13,7 @@ import type { User } from "firebase/auth";
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
+  const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [isBookingOpen, setIsBookingOpen] = useState<boolean>(false);
   const [isAdmin, setIsAdmin] = useState<boolean>(window.location.hash === "#admin");
 
@@ -53,9 +54,14 @@ function App() {
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, [user]);
 
-  // Mostrar AuthForm si no hay usuario
-  if (!user) {
-    return <AuthForm onSuccess={() => {}} />; // onSuccess actualiza el observer automáticamente
+  // Mostrar AuthForm si no hay usuario o si estamos mostrando la pantalla de verificación enviada
+  if (!user || isVerifying) {
+    return (
+      <AuthForm
+        onSuccess={() => setIsVerifying(false)}
+        onRegistering={(verifying) => setIsVerifying(verifying)}
+      />
+    );
   }
 
   // Mostrar admin
@@ -78,6 +84,7 @@ function App() {
         <BookingModal
           isOpen={isBookingOpen}
           onClose={() => setIsBookingOpen(false)}
+          userEmail={user?.email}
         />
       </Layout>
     </AppointmentProvider>
