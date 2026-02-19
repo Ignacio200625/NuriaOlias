@@ -81,6 +81,7 @@ function App() {
       <Layout
         onOpenBooking={() => setIsBookingOpen(true)}
         onOpenMyAppointments={() => setCurrentView('my-appointments')}
+        onGoHome={() => setCurrentView('home')}
         currentView={currentView}
         isLoggedIn={!!user}
       >
