@@ -1,7 +1,8 @@
 import emailjs from '@emailjs/browser';
 
 const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID as string;
-const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID as string;
+const APPOINTMENT_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID as string;
+const VERIFICATION_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_VERIFICATION_TEMPLATE_ID as string;
 const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY as string;
 
 export interface EmailParams {
@@ -18,7 +19,7 @@ export interface EmailParams {
 export const sendConfirmationEmail = async (params: EmailParams): Promise<void> => {
     const isConfigured =
         SERVICE_ID && !SERVICE_ID.includes('your_') &&
-        TEMPLATE_ID && !TEMPLATE_ID.includes('your_') &&
+        APPOINTMENT_TEMPLATE_ID && !APPOINTMENT_TEMPLATE_ID.includes('your_') &&
         PUBLIC_KEY && !PUBLIC_KEY.includes('your_');
 
     if (!isConfigured) {
@@ -45,7 +46,7 @@ export const sendConfirmationEmail = async (params: EmailParams): Promise<void> 
     console.log('Enviando email con parámetros:', templateParams);
 
     try {
-        const response = await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY);
+        const response = await emailjs.send(SERVICE_ID, APPOINTMENT_TEMPLATE_ID, templateParams, PUBLIC_KEY);
         console.log('Respuesta de EmailJS:', response);
     } catch (error) {
         console.error('Error detallado de EmailJS:', error);
@@ -68,7 +69,7 @@ export const sendVerificationCode = async (to_email: string, code: string): Prom
     console.log('Enviando código de verificación:', code, 'a:', to_email);
 
     try {
-        await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY);
+        await emailjs.send(SERVICE_ID, VERIFICATION_TEMPLATE_ID, templateParams, PUBLIC_KEY);
         console.log('Código de verificación enviado con éxito');
     } catch (error) {
         console.error('Error al enviar código de verificación:', error);
@@ -91,7 +92,7 @@ export const sendResetCode = async (to_email: string, code: string): Promise<voi
     console.log('Enviando código de recuperación:', code, 'a:', to_email);
 
     try {
-        await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY);
+        await emailjs.send(SERVICE_ID, VERIFICATION_TEMPLATE_ID, templateParams, PUBLIC_KEY);
         console.log('Código de recuperación enviado con éxito');
     } catch (error) {
         console.error('Error al enviar código de recuperación:', error);

@@ -2,13 +2,13 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDBnCsHYz9_-wa7pcl-E5eHAo-JWTCQeCM",
-    authDomain: "peluqueria-app-26873.firebaseapp.com",
-    projectId: "peluqueria-app-26873",
-    storageBucket: "peluqueria-app-26873.firebasestorage.app",
-    messagingSenderId: "1085240722207",
-    appId: "1:1085240722207:web:b5ea898e4b677ea708a62a",
-    measurementId: "G-N3TNB4L2RG"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 export const app = initializeApp(firebaseConfig);
