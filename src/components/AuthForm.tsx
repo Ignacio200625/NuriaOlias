@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { loginUser, registerUser, loginWithGoogle, resetPassword } from "../lib/auth";
-import { sendVerificationCode } from "../lib/emailService";
+import { sendVerificationCode, sendResetCode } from "../lib/emailService";
 import { Mail, Lock, ArrowRight, ArrowLeft, ShieldCheck, Timer } from "lucide-react";
 
 interface AuthFormProps {
@@ -8,7 +8,7 @@ interface AuthFormProps {
   onRegistering: (isRegistering: boolean) => void;
 }
 
-type AuthStep = 'login' | 'register_email' | 'register_password' | 'verify_code';
+type AuthStep = 'login' | 'register_email' | 'register_password' | 'verify_code' | 'verify_reset_code';
 
 const AuthForm: React.FC<AuthFormProps> = ({ onSuccess, onRegistering }) => {
   const [step, setStep] = useState<AuthStep>('login');
@@ -50,19 +50,51 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSuccess, onRegistering }) => {
 
   const handleForgotPassword = async () => {
     if (!email) {
-      setResetStatus("error");
       setError("Introduce tu email para restablecer la contraseña");
       return;
     }
     setResetLoading(true);
+    setError("");
     try {
-      await resetPassword(email);
-      setResetStatus("sent");
-    } catch {
-      setResetStatus("error");
-      setError("Error al enviar el email de restablecimiento");
+      const code = generateCode();
+      setGeneratedCode(code);
+      setTimeLeft(300);
+
+      // Enviamos código vía EmailJS (Trusted)
+      await sendResetCode(email, code);
+      console.log("Código de recuperación enviado:", code);
+
+      setStep('verify_reset_code');
+    } catch (err) {
+      setError("Error al enviar el código de recuperación");
     } finally {
       setResetLoading(false);
+    }
+  };
+
+  const handleVerifyResetAndTriggerFirebase = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (timeLeft <= 0) {
+      setError("El código ha caducado.");
+      return;
+    }
+
+    if (inputCode === generatedCode) {
+      setLoading(true);
+      try {
+        await resetPassword(email);
+        setResetStatus("sent");
+        setStep('login');
+        setError(""); // Limpiamos errores
+      } catch (err) {
+        setError("Error al solicitar el reseteo de Firebase");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setError("Código incorrecto.");
     }
   };
 
@@ -192,8 +224,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSuccess, onRegistering }) => {
     setInputCode("");
   };
 
-  // ── Pantalla de Verificación por Código ───────────────────
-  if (step === 'verify_code') {
+  // ── Pantalla de Verificación por Código (Registro o Reset) ────
+  if (step === 'verify_code' || step === 'verify_reset_code') {
+    const isReset = step === 'verify_reset_code';
+
     return (
       <div className="flex items-center justify-center min-h-screen bg-brand-cream px-4">
         <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-md border border-amber-200 text-center animate-in zoom-in duration-300">
@@ -202,13 +236,15 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSuccess, onRegistering }) => {
               <ShieldCheck className="text-amber-500 w-12 h-12" />
             </div>
           </div>
-          <h2 className="text-3xl font-serif font-bold text-gray-800 mb-2 tracking-tight">Verifica tu email</h2>
+          <h2 className="text-3xl font-serif font-bold text-gray-800 mb-2 tracking-tight">
+            {isReset ? "Recuperar cuenta" : "Verifica tu email"}
+          </h2>
           <p className="text-gray-500 mb-8 text-sm leading-relaxed px-2">
             Introduce el código de 6 dígitos enviado a:<br />
             <strong className="text-brand-black text-base">{email}</strong>
           </p>
 
-          <form onSubmit={handleVerifyAndRegister} className="space-y-6">
+          <form onSubmit={isReset ? handleVerifyResetAndTriggerFirebase : handleVerifyAndRegister} className="space-y-6">
             <div className="flex justify-center">
               <input
                 type="text"
@@ -240,13 +276,13 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSuccess, onRegistering }) => {
               disabled={loading || inputCode.length < 6}
               className="w-full py-5 bg-brand-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-all shadow-xl shadow-gray-200 active:scale-[0.97] disabled:opacity-50 text-lg"
             >
-              {loading ? "Verificando..." : "Confirmar y Crear Cuenta"}
+              {loading ? "Verificando..." : isReset ? "Validar Código" : "Confirmar y Crear Cuenta"}
             </button>
           </form>
 
           <div className="mt-10 pt-6 border-t border-gray-100 space-y-4">
             <button
-              onClick={handleResendCode}
+              onClick={isReset ? handleForgotPassword : handleResendCode}
               disabled={loading || timeLeft > 240}
               className="text-amber-600 hover:text-amber-700 font-bold text-sm disabled:opacity-30 block w-full transition-colors"
             >
@@ -256,7 +292,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ onSuccess, onRegistering }) => {
               onClick={handleBackToLogin}
               className="text-gray-400 hover:text-gray-500 text-sm flex items-center justify-center gap-1 mx-auto font-medium"
             >
-              <ArrowLeft className="w-4 h-4" /> Cancelar registro
+              <ArrowLeft className="w-4 h-4" /> Cancelar
             </button>
           </div>
         </div>
