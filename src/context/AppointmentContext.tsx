@@ -76,7 +76,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     const seedDatabase = async () => {
         try {
             console.log("Seeding database with mock data...");
-            const batch = writeBatch(db);
+          
             // We can't use batch for addDoc easily with auto-ID in v9 modular style without doc ref
             // Let's just do parallel promises for simplicity
             const promises = mockAppointments.map(app => {
