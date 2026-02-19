@@ -4,7 +4,7 @@ import type { Appointment } from '../types';
 import { db } from '../lib/firebase';
 import { collection, addDoc, deleteDoc, doc, onSnapshot, query } from 'firebase/firestore';
 import { mockAppointments } from '../data/mockData';
-import { writeBatch } from 'firebase/firestore';
+
 
 interface AppointmentContextType {
     appointments: Appointment[];
