@@ -1,7 +1,11 @@
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
 
-const Hero: React.FC = () => {
+interface HeroProps {
+    onOpenBooking: () => void;
+}
+
+const Hero: React.FC<HeroProps> = ({ onOpenBooking }) => {
     return (
         <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden">
             {/* Background Image with Overlay */}
@@ -30,12 +34,12 @@ const Hero: React.FC = () => {
                     Expertos en color, corte y salud capilar. Un espacio exclusivo donde el estilo se encuentra con el bienestar.
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up delay-300">
-                    <a
-                        href="#contact"
+                    <button
+                        onClick={onOpenBooking}
                         className="px-8 py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-full font-medium hover:shadow-lg hover:shadow-amber-400/50 hover:scale-105 transition-all duration-300"
                     >
                         Pedir Cita
-                    </a>
+                    </button>
                     <a
                         href="#services"
                         className="px-8 py-4 border-2 border-white text-white rounded-full font-medium hover:bg-white hover:text-black transition-all duration-300 backdrop-blur-sm"

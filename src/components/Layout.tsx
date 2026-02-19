@@ -3,9 +3,10 @@ import { Menu, X, Instagram, Phone, MapPin } from 'lucide-react';
 
 interface LayoutProps {
     children: React.ReactNode;
+    onOpenBooking: () => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Layout: React.FC<LayoutProps> = ({ children, onOpenBooking }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -29,12 +30,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <a href="#services" className="text-sm font-medium hover:text-brand-gold transition-colors">SERVICIOS</a>
                             <a href="#gallery" className="text-sm font-medium hover:text-brand-gold transition-colors">GALERÍA</a>
                             <a href="#contact" className="text-sm font-medium hover:text-brand-gold transition-colors">CONTACTO</a>
-                            <a
-                        href="#contact"
-                        className="px-8 py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-full font-medium hover:shadow-lg hover:shadow-amber-400/50 hover:scale-105 transition-all duration-300"
-                    >
-                        Pedir Cita
-                    </a>
+                            <button
+                                onClick={onOpenBooking}
+                                className="px-8 py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-full font-medium hover:shadow-lg hover:shadow-amber-400/50 hover:scale-105 transition-all duration-300"
+                            >
+                                Pedir Cita
+                            </button>
                         </div>
 
                         {/* Mobile Menu Button */}
@@ -81,13 +82,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             >
                                 CONTACTO
                             </a>
-                            <a
-                                href="#contact"
+                            <button
                                 className="px-8 py-4 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-full font-medium hover:shadow-lg hover:shadow-amber-400/50 hover:scale-105 transition-all duration-300 mt-4 block w-full text-center bg-brand-black text-white px-6 py-3 rounded-full font-medium hover:bg-brand-gold transition-colors"
-                                onClick={() => setIsMenuOpen(false)}
+                                onClick={() => {
+                                    onOpenBooking();
+                                    setIsMenuOpen(false);
+                                }}
                             >
                                 RESERVAR CITA
-                            </a>
+                            </button>
                         </div>
                     </div>
                 )}
@@ -150,8 +153,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         </div>
                     </div>
 
-                    <div className="border-t border-gradient-to-r from-transparent via-gray-600 to-transparent mt-16 pt-8 text-center">
+                    <div className="border-t border-gradient-to-r from-transparent via-gray-600 to-transparent mt-16 pt-8 text-center relative max-w-7xl mx-auto px-4">
                         <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} <span className="text-transparent bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text font-medium">Peluquería Nuria Olias</span>. Todos los derechos reservados.</p>
+                        <a href="#admin" className="absolute bottom-1 right-4 text-[10px] text-gray-800 hover:text-gray-600 transition-colors opacity-50 hover:opacity-100">Admin</a>
                     </div>
                 </div>
             </footer>

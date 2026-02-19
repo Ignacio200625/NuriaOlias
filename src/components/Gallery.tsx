@@ -1,25 +1,31 @@
 import React from 'react';
+import salonCapture from "../assets/salon-capture.png";
+import salonCaptureNew from "../assets/salon-capture-new.png";
 
 const images = [
     {
+        url: "https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        title: "Salón Principal"
+    },
+    {
         url: "https://images.unsplash.com/photo-1562322140-8baeececf3df?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
         title: "Coloración Blonde"
+    },
+    {
+        url: salonCapture, // Using the local image
+        title: "Resultados Reales"
     },
     {
         url: "https://images.unsplash.com/photo-1605497788044-5a32c7078486?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
         title: "Corte Bob"
     },
     {
-        url: "https://images.unsplash.com/photo-1595476103518-3c8ad04601bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-        title: "Ondas Naturales"
-    },
-    {
-        url: "https://images.unsplash.com/photo-1519699047748-40ba5266f2cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-        title: "Recogidos"
+        url:salonCaptureNew,
+        title: "Recogidos de Novia"
     },
     {
         url: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-        title: "Tratamientos"
+        title: "Tratamientos SPA"
     },
     {
         url: "https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
@@ -30,12 +36,8 @@ const images = [
         title: "Mechas Balayage"
     },
     {
-        url: "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        url: "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
         title: "Cuidado Capilar"
-    },
-    {
-        url: "https://images.unsplash.com/photo-1481068140073-f01b1a545924?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-        title: "Innovación"
     }
 ];
 
