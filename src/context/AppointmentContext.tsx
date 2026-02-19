@@ -1,11 +1,17 @@
 import type { ReactNode } from 'react';
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { Appointment } from '../types';
+import { db } from '../lib/firebase';
+import { collection, addDoc, deleteDoc, doc, onSnapshot, query } from 'firebase/firestore';
 import { mockAppointments } from '../data/mockData';
+import { writeBatch } from 'firebase/firestore';
 
 interface AppointmentContextType {
     appointments: Appointment[];
-    addAppointment: (appointment: Appointment) => void;
+    loading: boolean;
+    error: string | null;
+    addAppointment: (appointment: Appointment) => Promise<void>;
+    removeAppointment: (id: string) => Promise<void>;
     isSlotAvailable: (date: Date, serviceDuration: number) => boolean;
 }
 
@@ -13,28 +19,98 @@ const AppointmentContext = createContext<AppointmentContextType | undefined>(und
 
 export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // Load from localStorage on mount
+    // Load from Firestore (Real-time)
     useEffect(() => {
-        const stored = localStorage.getItem('appointments');
-        if (stored) {
-            // Parse dates back to Date objects
-            const parsed = JSON.parse(stored).map((app: any) => ({
-                ...app,
-                date: new Date(app.date)
-            }));
-            setAppointments(parsed);
-        } else {
-            // Initialize with mock data if empty
-            setAppointments(mockAppointments);
-            localStorage.setItem('appointments', JSON.stringify(mockAppointments));
-        }
+        console.log("Initializing Firestore listener...");
+        const q = query(collection(db, "appointments"));
+
+        // Safety timeout: stop loading if firebase hangs
+        const timeoutId = setTimeout(() => {
+            setLoading((currentLoading) => {
+                if (currentLoading) {
+                    console.error("Firestore connection timed out");
+                    setError("La conexión está tardando demasiado. Verifica tu internet.");
+                    return false;
+                }
+                return currentLoading;
+            });
+        }, 8000); // 8 seconds timeout
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            clearTimeout(timeoutId); // Connection successful
+
+            const parsed = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id, // Use Firestore ID
+                    ...data,
+                    // Convert Firestore Timestamp to Date if needed, or string to Date
+                    // Handle both Firestore Timestamp (has toDate) and string
+                    date: data.date?.toDate ? data.date.toDate() : new Date(data.date)
+                } as Appointment;
+            });
+
+            // SEEDING: If database is empty, seed with mock data
+            if (parsed.length === 0 && !localStorage.getItem('dbSeeded')) {
+                seedDatabase();
+            } else {
+                setAppointments(parsed);
+                setLoading(false);
+            }
+        }, (err) => {
+            clearTimeout(timeoutId);
+            console.error("Firestore Error:", err);
+            setError("Error cargando citas. Verifica permisos o conexión.");
+            setLoading(false);
+        });
+
+        return () => {
+            unsubscribe();
+            clearTimeout(timeoutId);
+        };
     }, []);
 
-    const addAppointment = (newAppointment: Appointment) => {
-        const updated = [...appointments, newAppointment];
-        setAppointments(updated);
-        localStorage.setItem('appointments', JSON.stringify(updated));
+    const seedDatabase = async () => {
+        try {
+            console.log("Seeding database with mock data...");
+            const batch = writeBatch(db);
+            // We can't use batch for addDoc easily with auto-ID in v9 modular style without doc ref
+            // Let's just do parallel promises for simplicity
+            const promises = mockAppointments.map(app => {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { id, ...data } = app;
+                return addDoc(collection(db, "appointments"), data);
+            });
+            await Promise.all(promises);
+            localStorage.setItem('dbSeeded', 'true');
+            console.log("Database seeded!");
+        } catch (e) {
+            console.error("Error seeding database:", e);
+        }
+    };
+
+    const addAppointment = async (newAppointment: Appointment) => {
+        // We let Firestore generate the ID, or use the one we created if we want custom IDs
+        // But better to let Firestore handle it. 
+        // However, our App logic generates a UUID. We can use that as the Doc ID or just pass data.
+        // Let's rely on Firestore auto-ID for simplicity in future, 
+        // BUT for now our app generates an ID. Let's use `addDoc` and let Firestore make its own ID,
+        // OR better: use `setDoc` with our ID if we want to keep frontend consistency.
+        // Actually, easiest is: ignore the frontend ID and let Firestore assign one?
+        // No, let's keep it simple. `addDoc` creates a new ID. We will map doc.id to app.id in the listener.
+
+        // Exclude 'id' from the data we save, as Firestore provides it
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id, ...appointmentData } = newAppointment;
+
+        await addDoc(collection(db, "appointments"), appointmentData);
+    };
+
+    const removeAppointment = async (id: string) => {
+        await deleteDoc(doc(db, "appointments", id));
     };
 
     const isSlotAvailable = (checkDate: Date, durationMinutes: number): boolean => {
@@ -62,7 +138,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     };
 
     return (
-        <AppointmentContext.Provider value={{ appointments, addAppointment, isSlotAvailable }}>
+        <AppointmentContext.Provider value={{ appointments, loading, error, addAppointment, removeAppointment, isSlotAvailable }}>
             {children}
         </AppointmentContext.Provider>
     );
